@@ -35,7 +35,25 @@ warnings.filterwarnings("ignore")
 
 
 def clean_loans(loans):
-    ...
+    def convert_date(loans):
+        loans['issue_d'] = pd.to_datetime(loans['issue_d'],format="%b-%Y")
+        return loans
+    def term_len(loans):
+        loans['term'] = loans['term'].str.strip(" months").astype(int)
+        return loans
+    def clean_title(loans):
+        loans['emp_title'] = loans['emp_title'].str.strip().str.lower()
+        loans.loc[loans['emp_title']=='rn','emp_title'] = 'registered nurse'
+        return loans
+    def create_term_end(loans):
+        loans['term_end'] = [d+pd.DateOffset(months=m) for d,m in 
+                             zip(loans['issue_d'],loans['term'])]
+        return loans
+    return (loans
+            .pipe(convert_date)
+            .pipe(term_len)
+            .pipe(clean_title)
+            .pipe(create_term_end))
 
 
 # ---------------------------------------------------------------------
@@ -45,7 +63,15 @@ def clean_loans(loans):
 
 
 def correlations(df, pairs):
-    ...
+    result = pd.Series()
+    for pair in pairs:
+        if pair[0] in df.columns and pair[1] in df.columns:
+            r_corr = (df[[pair[0],pair[1]]]
+                      .corr(method='pearson')
+                      .loc[pair[0]].get(pair[1]))
+            result['r_'+'_'.join(pair)] = r_corr
+    return result
+
 
 
 
