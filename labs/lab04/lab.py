@@ -14,7 +14,12 @@ import os
 
 
 def prime_time_logins(login):
-    ...
+    login_copy = login.assign(Time=pd.to_datetime(login['Time']))
+    return (login_copy
+            .assign(Time=(login_copy['Time'].dt.hour>=16)
+                     & (login_copy['Time'].dt.hour<20))
+            .groupby('Login Id').sum())
+
 
 
 # ---------------------------------------------------------------------
@@ -23,8 +28,10 @@ def prime_time_logins(login):
 
 
 def count_frequency(login):
-    ...
-
+    def get_freq(times):
+        times = pd.to_datetime(times)
+        return times.count()/((pd.Timestamp('2024-01-31')-times.min()).days+1)
+    return login.groupby('Login Id')['Time'].agg(get_freq)
 
 # ---------------------------------------------------------------------
 # QUESTION 3
@@ -32,10 +39,15 @@ def count_frequency(login):
 
 
 def cookies_null_hypothesis():
-    ...
+    return [1,2]
                          
 def cookies_p_value(N):
-    ...
+    cookies = [0.04,0.96]
+    num_cookies = 250
+    sample_statistic = 15
+    simulations = np.random.multinomial(num_cookies,cookies,size=N)
+    return np.mean(simulations[:,0]>=sample_statistic)
+
 
 
 # ---------------------------------------------------------------------

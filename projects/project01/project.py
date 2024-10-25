@@ -170,13 +170,13 @@ def z_score(ser):
         return (ser-ser.mean())/ser.std(ddof=0)
     
 def add_post_redemption(grades_combined):
-    cleaned_midterm = grades_combined['Midterm'].fillna(0)
-    mt_prop = cleaned_midterm/grades_combined['Midterm - Max Points']
+    cleaned_midterm = grades_combined['Midterm']
+    mt_prop = cleaned_midterm.fillna(0.0)/(grades_combined['Midterm - Max Points'].astype(float).max())
     mt_z = z_score(mt_prop)
     redem_z = z_score(grades_combined['Raw Redemption Score'])
-    post_redem = pd.Series(max(a,b) for a,b in zip(redem_z,mt_z))*np.std(mt_prop,ddof=0)+mt_prop.mean()
+    post_redem = pd.Series(max(a,b) for a,b in zip(redem_z,mt_z))*mt_prop.std(ddof=0)+mt_prop.mean()
     grades_combined['Midterm Score Pre-Redemption'] = mt_prop
-    grades_combined['Midterm Score Post-Redemption'] = post_redem
+    grades_combined['Midterm Score Post-Redemption'] = post_redem#.apply(lambda x:min(x,1))
     return grades_combined
 
 
