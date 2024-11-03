@@ -39,14 +39,14 @@ def count_frequency(login):
 
 
 def cookies_null_hypothesis():
-    return [1,2]
+    return [2]
                          
 def cookies_p_value(N):
     cookies = [0.04,0.96]
     num_cookies = 250
     obs_statistic = 15
-    simulations = np.random.multinomial(num_cookies,cookies,size=N)
-    return float(np.mean(simulations[:,0]>=obs_statistic))
+    simulations = np.random.binomial(num_cookies,cookies[0],size=N)
+    return float(np.mean(simulations>=obs_statistic))
 
 
 
@@ -132,11 +132,11 @@ def color_p_value(data, col='orange'):
 
 
 def ordered_colors():
-    return [('green', 0.491),
-            ('orange', 0.053),
-            ('purple', 0.984),
+    return [('yellow', 0.0),
+            ('orange', 0.042),
             ('red', 0.221),
-            ('yellow', 0.0)][::-1]
+            ('green', 0.484),
+            ('purple', 0.971)]
 
 
 # ---------------------------------------------------------------------

@@ -123,7 +123,7 @@ def argument_for_nmar():
     return '''
     The personal statement can also be NMAR because some people may not provide
     a personal statement because they don't have an uncommon reason for a loan
-    such as an urgent vet bill
+    such as family's funeral and urgent medical bills.
     '''
 
 
@@ -221,17 +221,16 @@ def find_disposable_income(loans_with_state_taxes):
 def aggregate_and_combine(loans, keywords, quantitative_column, categorical_column):
     query = loans.copy()
     forged_names = []
-    query['temp'] = query['emp_title']
     for keyword in keywords:
-        query.loc[query['emp_title'].str.contains(keyword),'temp'] = f"{keyword}_mean_{quantitative_column}"
+        query.loc[query['emp_title'].str.contains(keyword),'emp_title'] = f"{keyword}_mean_{quantitative_column}"
         forged_names.append(f"{keyword}_mean_{quantitative_column}")
-    result = query[query['temp'].isin(forged_names)].pivot_table(
+    result = query[query['emp_title'].isin(forged_names)].pivot_table(
         index = categorical_column,
         values = quantitative_column,
-        columns = 'temp',
+        columns = 'emp_title',
         aggfunc = 'mean'
     )
-    result.loc['Overall'] = query[query['temp'].isin(forged_names)].groupby('temp')[quantitative_column].mean()
+    result.loc['Overall'] = query[query['emp_title'].isin(forged_names)].groupby('emp_title')[quantitative_column].mean()
     return result
 
 
@@ -246,11 +245,11 @@ def exists_paradox(loans, keywords, quantitative_column, categorical_column):
         return False
     #diff = diff.diff(axis=1).iloc[:,-1]
     diff = diff.iloc[:,0] - diff.iloc[:,-1]
-    return not (diff.empty or len(diff) < 2) and bool(((diff[:-1] > 0).all() and diff[-1] < 0) or ((diff[:-1] < 0).all() and diff[-1] > 0))
+    return not (diff.empty or len(diff) < 2) and bool(((diff.iloc[:-1] > 0).all() and diff.iloc[-1] < 0) or ((diff.iloc[:-1] < 0).all() and diff.iloc[-1] > 0))
 def paradox_example(loans):
     return {
         'loans': loans,
-        'keywords': ['nurse', 'engineer'],
-        'quantitative_column': 'loan_amnt',
-        'categorical_column': 'grade'
+        'keywords': ['manager', 'driver'],
+        'quantitative_column': 'int_rate',
+        'categorical_column': 'term'
     }
